@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DRUG PROTEIN INTERACTION PREDICTOR</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+    
+    <style>
+        /* --- THEME --- */
+        :root { 
+            --bg: #02040a; 
+            --panel: rgba(10, 25, 41, 0.95); 
+            --text: #e6f1ff; 
+            --accent: #64ffda; 
+            --secondary: #007aff; 
+            --danger: #ff5555; 
+            --success: #00ff9d; 
+        }
+        body { 
+            background: radial-gradient(circle at center, #0a192f 0%, #02040a 100%); 
+            color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+        }
+        
+        /* NAVIGATION */
+        .nav-bar { display: flex; gap: 20px; margin-top: 30px; }
+        .tab-btn { 
+            background: transparent; 
+            border: 1px solid var(--secondary); 
+            color: #8892b0; 
+            padding: 10px 30px; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: 0.3s; 
+        }
+        .tab-btn:hover { border-color: var(--accent); color: #fff; }
+        .tab-btn.active { 
+            background: rgba(0, 122, 255, 0.2); 
+            color: var(--accent); 
+            border-color: var(--accent); 
+            box-shadow: 0 0 15px rgba(100,255,218,0.2); 
+        }
+
+        /* LAYOUT */
+        .container { width: 900px; margin-top: 20px; position: relative; }
+        .panel-view { display: none; animation: fadeIn 0.5s; }
+        .panel-view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .glass-box { 
+            background: var(--panel); 
+            border: 1px solid rgba(100, 255, 218, 0.1); 
+            border-radius: 12px; 
+            padding: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            backdrop-filter: blur(10px);
+        }
+
+        /* INPUTS & CONTROLS */
+        h1 { color: var(--accent); margin-top: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }
+        .select-row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+        .select-btn { 
+            background: rgba(0, 122, 255, 0.2); 
+            border: 1px solid var(--secondary); 
+            color: #fff; 
+            padding: 5px 15px; 
+            border-radius: 15px; 
+            font-size: 10px; 
+            cursor: pointer; 
+            transition: 0.2s;
+        }
+        .select-btn:hover { background: var(--secondary); }
+        
+        textarea { 
+            width: 100%; 
+            background: rgba(2, 12, 27, 0.7); 
+            border: 1px solid rgba(136, 146, 176, 0.2); 
+            color: var(--text); 
+            padding: 15px; 
+            height: 50px; 
+            margin-top: 8px; 
+            border-radius: 8px; 
+            font-family: monospace; 
+            resize: none; 
+            box-sizing: border-box; 
+        }
+        textarea:focus { border-color: var(--accent); outline: none; }
+
+        /* MAIN ACTION BUTTON */
+        .main-btn { 
+            width: 100%; 
+            margin-top: 30px; 
+            padding: 15px; 
+            background: linear-gradient(90deg, var(--secondary), #00c6ff); 
+            border: none; 
+            border-radius: 8px; 
+            color: #fff; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 16px; 
+            transition: 0.3s;
+        }
+        .main-btn:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0, 198, 255, 0.4); }
+
+        /* RESULT SECTION */
+        #result-section { 
+            margin-top: 30px; 
+            display: none; 
+            text-align: center; 
+            padding: 20px; 
+            background: rgba(0,0,0,0.3); 
+            border-radius: 8px; 
+        }
+        .status-text { font-size: 24px; font-weight: bold; display: block; margin-bottom: 10px; }
+        .progress-bg { width: 100%; background: rgba(255,255,255,0.1); height: 10px; border-radius: 5px; overflow: hidden; }
+        .progress-fill { height: 100%; width: 0%; transition: width 1s ease; }
+
+        /* 3D BUTTON (Navigation) */
+        #btn-go-3d { 
+            display: none; 
+            margin: 20px auto 0 auto; 
+            background: rgba(100, 255, 218, 0.1); 
+            border: 1px solid var(--accent); 
+            color: var(--accent); 
+            padding: 12px 30px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+        #btn-go-3d:hover { background: var(--accent); color: #000; box-shadow: 0 0 15px var(--accent); }
+
+        /* --- VIEW CONTROLLER BAR --- */
+        .view-controls {
+            display: flex; gap: 10px; margin-top: 15px; justify-content: center;
+        }
+        .view-btn {
+            background: #112240; border: 1px solid #333; color: #8892b0;
+            padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;
+            transition: 0.2s;
+        }
+        .view-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .view-btn.active-view { background: var(--accent); color: #000; border-color: var(--accent); }
+
+        /* VIEWER */
+        #mol-container { 
+            width: 100%; 
+            height: 500px; 
+            background: #000; 
+            border-radius: 8px; 
+            position: relative; 
+            border: 1px solid #333; 
+        }
+
+        /* MODAL */
+        #modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+        .modal-content { background: #0a192f; border: 1px solid var(--accent); width: 400px; max-height: 600px; border-radius: 10px; display: flex; flex-direction: column; padding: 10px; }
+        .list-item { padding: 10px; background: #112240; margin-bottom: 5px; cursor: pointer; color: #8892b0; border-radius: 4px; border: 1px solid transparent; }
+        .list-item:hover { color: var(--accent); border-color: var(--accent); background: rgba(100, 255, 218, 0.1); }
+    </style>
+</head>
+<body>
+
+<div class="nav-bar">
+    <button class="tab-btn active" onclick="switchTab('predict')">1. PREDICTION AI</button>
+    <button class="tab-btn" id="nav-3d" onclick="switchTab('visualize')">2. 3D SIMULATION</button>
+</div>
+
+<div class="container">
+    <div id="panel-predict" class="panel-view active">
+        <div class="glass-box">
+            <h1>DRUG PROTEIN INTERACTION PREDICTOR <span style="font-size:12px; opacity:0.6; margin-left:auto;">SYSTEM ONLINE</span></h1>
+            
+            <div class="select-row"><label>TARGET PROTEIN</label><button class="select-btn" onclick="openList('proteins')">📂 OPEN DATABASE</button></div>
+            <textarea id="prot" placeholder="Select Protein from Database..."></textarea>
+
+            <div class="select-row"><label>DRUG MOLECULE</label><button class="select-btn" onclick="openList('drugs')">💊 OPEN PHARMACY</button></div>
+            <textarea id="drug" placeholder="Select Drug from Pharmacy..."></textarea>
+
+            <button class="main-btn" onclick="runAnalysis()">RUN ANALYSIS</button>
+
+            <div id="result-section">
+                <span id="res-text" class="status-text">ANALYZING...</span>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:12px; color:#aaa;">
+                    <span>CONFIDENCE SCORE</span><span id="res-score">0%</span>
+                </div>
+                <div class="progress-bg"><div id="progress-bar" class="progress-fill"></div></div>
+                
+                <button id="btn-go-3d" onclick="loadAndSwitchTo3D()">Isolate & Visualize Structure ➔</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="panel-visualize" class="panel-view">
+        <div class="glass-box">
+            <h1>MOLECULAR SIMULATION <span style="font-size:12px; margin-left:auto; color:#8892b0;" id="3d-status">WAITING...</span></h1>
+            
+            <div id="mol-container"></div>
+            
+            <div class="view-controls">
+                <button class="view-btn" onclick="viewProtein()">1. PROTEIN ONLY</button>
+                <button class="view-btn" onclick="viewDrug()">2. DRUG ONLY (AUTHENTIC)</button>
+                <button class="view-btn active-view" onclick="viewInteraction()">3. INTERACTION (COMBINED)</button>
+            </div>
+            
+            <div style="margin-top:10px; color:#666; font-size:10px; text-align:center;">
+                LEFT CLICK: Rotate | SCROLL: Zoom | RIGHT CLICK: Move
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal"><div class="modal-content" id="modal-box"></div></div>
+
+<script>
+    let dbData = {};
+    let viewer = null;
+    let currentInputs = { d: null, p: null };
+    
+    // Selectors for PDB atoms
+    const selProtein = {hetflag: false};
+    const selDrug = {hetflag: true, not: {resn: ["HOH", "WAT", "H2O"]}};
+
+    // --- 1. SETUP & INITIALIZATION ---
+    window.onload = async function() {
+        if (window.$3Dmol) {
+            viewer = $3Dmol.createViewer("mol-container", { backgroundColor: "black" });
+        }
+        try {
+            const res = await fetch('http://127.0.0.1:5000/lists');
+            dbData = await res.json();
+        } catch(e) {}
+    };
+
+    // --- 2. PREDICTION LOGIC ---
+    async function runAnalysis() {
+        const d = document.getElementById('drug').value.trim();
+        const p = document.getElementById('prot').value.trim();
+        if(!d || !p) { alert("Please input both."); return; }
+
+        const resSec = document.getElementById('result-section');
+        const resText = document.getElementById('res-text');
+        const resBar = document.getElementById('progress-bar');
+        const btn3d = document.getElementById('btn-go-3d');
+
+        resSec.style.display = 'block';
+        resText.innerText = "CALCULATING...";
+        resBar.style.width = "20%";
+        resBar.style.backgroundColor = "#555";
+        btn3d.style.display = 'none';
+
+        try {
+            const req = await fetch('http://127.0.0.1:5000/predict', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ smiles: d, sequence: p })
+            });
+            const data = await req.json();
+            currentInputs.d = d; currentInputs.p = p;
+
+            const percent = data.confidence.toFixed(1) + "%";
+            document.getElementById('res-score').innerText = percent;
+            resBar.style.width = percent;
+
+            if(data.binds) {
+                resText.innerText = "✅ INTERACTION DETECTED";
+                resText.style.color = "var(--success)";
+                resBar.style.backgroundColor = "var(--success)";
+                btn3d.style.display = 'block'; 
+            } else {
+                resText.innerText = "❌ NO INTERACTION";
+                resText.style.color = "var(--danger)";
+                resBar.style.backgroundColor = "var(--danger)";
+                btn3d.style.display = 'none'; 
+            }
+        } catch(e) { alert("Error connecting to backend."); }
+    }
+
+    // --- 3. LOAD DATA (Called first time) ---
+    async function loadAndSwitchTo3D() {
+        switchTab('visualize');
+        document.getElementById('3d-status').innerText = "DOWNLOADING PDB DATA...";
+        viewer.clear();
+        
+        try {
+            const req = await fetch('http://127.0.0.1:5000/visualize', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ smiles: currentInputs.d, prot_name: currentInputs.p })
+            });
+            const data = await req.json();
+
+            if(data.protein_pdb_id) {
+                $3Dmol.download("pdb:" + data.protein_pdb_id, viewer, {multimodel:true, frames:true}, function(){
+                    viewInteraction(); // Default load state
+                });
+                document.getElementById('3d-status').innerText = "LOADED: " + data.protein_pdb_id;
+            } else {
+                document.getElementById('3d-status').innerText = "NO PDB FOUND.";
+            }
+        } catch(e) { alert("Viz Error"); }
+    }
+
+    // --- 4. VIEW CONTROLLERS (UPDATED) ---
+    
+    // Mode 1: Protein Only (Opaque Ribbon)
+    function viewProtein() {
+        if(!viewer) return;
+        resetButtons(0);
+        viewer.setStyle(selProtein, {cartoon: {color: 'spectrum', opacity: 1.0}});
+        viewer.setStyle(selDrug, {hidden: true});
+        viewer.removeAllLabels();
+        viewer.zoomTo(selProtein);
+        viewer.render();
+    }
+
+    // Mode 2: Drug Only (AUTHENTIC BALL & STICK)
+    function viewDrug() {
+        if(!viewer) return;
+        resetButtons(1);
+        viewer.setStyle(selProtein, {hidden: true}); // Hide Protein
+        
+        // --- NEW AUTHENTIC STYLE ---
+        // 1. Sticks (Bonds)
+        viewer.setStyle(selDrug, {stick: {radius: 0.2}}); 
+        // 2. Spheres (Atoms) - Standard CPK colors assumed if no color specified
+        viewer.addStyle(selDrug, {sphere: {radius: 0.4}});
+        // ---------------------------
+
+        viewer.removeAllLabels();
+        viewer.addLabel("AUTHENTIC CHEMICAL STRUCTURE", {position: {x:0,y:0,z:0}, useScreen: true, backgroundColor:'black'});
+        viewer.zoomTo(selDrug);
+        viewer.render();
+    }
+
+    // Mode 3: Interaction (Ghost Protein + Giant Yellow Spheres)
+    function viewInteraction() {
+        if(!viewer) return;
+        resetButtons(2);
+        // Transparent Ghost Protein
+        viewer.setStyle(selProtein, {cartoon: {color: 'spectrum', opacity: 0.5}});
+        // Giant Yellow Drug
+        viewer.setStyle(selDrug, {sphere: {color: '#FFFF00', radius: 1.2}});
+        
+        viewer.removeAllLabels();
+        viewer.addLabel(">>> INTERACTION SITE <<<", {
+            inFront: true, fontSize: 14, fontColor: "yellow", backgroundColor: "black"
+        }, selDrug);
+
+        viewer.zoomTo(selDrug);
+        viewer.render();
+    }
+
+    // Helper to highlight active button
+    function resetButtons(idx) {
+        const btns = document.querySelectorAll('.view-btn');
+        btns.forEach(b => b.classList.remove('active-view'));
+        btns[idx].classList.add('active-view');
+    }
+
+    // --- 5. UTILS ---
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel-view').forEach(p => p.classList.remove('active'));
+        if(tab === 'predict') {
+            document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+            document.getElementById('panel-predict').classList.add('active');
+        } else {
+            document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+            document.getElementById('panel-visualize').classList.add('active');
+            if(viewer) setTimeout(() => viewer.render(), 100); 
+        }
+    }
+
+    function openList(type) {
+        const modal = document.getElementById('modal');
+        const box = document.getElementById('modal-box');
+        modal.style.display = 'flex';
+        box.innerHTML = `<div style="padding:10px; border-bottom:1px solid #333; display:flex; justify-content:space-between;"><b>SELECT ${type.toUpperCase()}</b><span onclick="document.getElementById('modal').style.display='none'" style="cursor:pointer; color:red;">✕</span></div><div style="overflow-y:auto; padding:10px;"></div>`;
+        const list = box.lastChild;
+        if(dbData[type]) {
+            dbData[type].forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerText = item;
+                div.onclick = () => { 
+                    document.getElementById(type === 'drugs' ? 'drug' : 'prot').value = item; 
+                    document.getElementById('modal').style.display = 'none'; 
+                };
+                list.appendChild(div);
+            });
+        }
+    }
+</script>
+</body>
+</html>
