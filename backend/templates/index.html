@@ -3,79 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DRUG PROTEIN INTERACTION PREDICTOR</title>
+    <title>BioPredictor AI</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* Enterprise Pharma Theme */
+        /* Modern SaaS Theme */
         :root {
-            --primary-blue: #1976d2; 
-            --dark-blue: #0d47a1; 
-            --bg-body: #f0f4f8; 
-            --bg-panel: #ffffff; 
-            --text-main: #1c2833; 
-            --text-muted: #566573;
-            --border-color: #d5d8dc;
-            --success-green: #117a65;
-            --danger-red: #c0392b;
+            --primary: #4f46e5; /* Indigo */
+            --primary-hover: #4338ca;
+            --bg-color: #f3f4f6; /* Soft gray */
+            --card-bg: #ffffff;
+            --text-dark: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --danger: #ef4444;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
-        body { background-color: var(--bg-body); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        body { 
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            color: var(--text-dark); 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+        }
 
-        /* Top Navigation */
-        .navbar { background-color: var(--bg-panel); border-bottom: 1px solid var(--border-color); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
-        .navbar-brand { font-size: 1.25rem; font-weight: 700; color: var(--primary-blue); letter-spacing: -0.5px; text-transform: uppercase; }
-        .navbar-status { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+        /* Sleek Navbar */
+        .navbar { 
+            background-color: var(--card-bg); 
+            padding: 16px 32px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+        .navbar-brand { 
+            font-size: 1.4rem; 
+            font-weight: 700; 
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px; 
+        }
+        .navbar-status { font-size: 0.85rem; color: var(--success); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .status-dot { width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; }
 
-        /* Dashboard Grid */
-        .dashboard-container { display: flex; flex: 1; padding: 24px; gap: 24px; overflow: hidden; }
+        /* Dashboard Layout */
+        .dashboard-container { display: flex; flex: 1; padding: 24px 32px; gap: 24px; overflow: hidden; }
+
+        /* Modern Cards */
+        .card { 
+            background-color: var(--card-bg); 
+            border-radius: 16px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); 
+            border: 1px solid rgba(255,255,255,0.5);
+            display: flex; 
+            flex-direction: column; 
+        }
 
         /* Left Panel */
-        .control-panel { width: 350px; background-color: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 6px; padding: 20px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); overflow-y: auto; }
-        .section-title { font-size: 0.95rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); border-bottom: 2px solid var(--border-color); padding-bottom: 8px; margin-bottom: 10px; }
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
-        .form-control { padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.9rem; transition: background-color 0.3s, border-color 0.2s; }
-        .form-control:focus { outline: none; border-color: var(--primary-blue); }
-        .btn-run { background-color: var(--primary-blue); color: white; border: none; padding: 12px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; margin-top: 10px; }
-        .btn-run:hover { background-color: var(--dark-blue); }
+        .control-panel { width: 380px; padding: 24px; overflow-y: auto; }
+        .section-title { font-size: 1.1rem; font-weight: 600; color: var(--text-dark); margin-bottom: 20px; }
+        
+        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+        .form-control { 
+            padding: 12px 16px; 
+            border: 2px solid var(--border); 
+            border-radius: 10px; 
+            font-size: 0.95rem; 
+            transition: all 0.2s; 
+            background-color: #f9fafb;
+        }
+        .form-control:focus { outline: none; border-color: var(--primary); background-color: #fff; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        
+        .btn-run { 
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white; 
+            border: none; 
+            padding: 14px; 
+            border-radius: 10px; 
+            font-weight: 600; 
+            font-size: 1rem;
+            cursor: pointer; 
+            transition: transform 0.1s, box-shadow 0.2s; 
+            margin-top: 10px; 
+            width: 100%;
+        }
+        .btn-run:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
 
-        /* Database Quick-Select Styles */
-        .db-section { margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 20px; }
-        .db-title-small { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; margin-top: 12px; }
-        .db-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-        .db-badge { background-color: #e9ecef; color: var(--text-main); font-size: 0.8rem; font-weight: 500; padding: 6px 12px; border-radius: 20px; cursor: pointer; border: 1px solid transparent; transition: all 0.2s ease; }
-        .db-badge:hover { background-color: #e3f2fd; border-color: var(--primary-blue); color: var(--dark-blue); transform: translateY(-1px); }
-        .demo-btn { background-color: #d1e7dd; color: var(--success-green); border: 1px solid #badbcc; width: 100%; text-align: center; margin-top: 15px; }
-        .demo-btn:hover { background-color: #badbcc; }
+        /* Database Pills */
+        .db-section { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 24px; }
+        .db-title-small { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 10px; }
+        .db-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .db-badge { 
+            background-color: #f3f4f6; 
+            color: var(--text-dark); 
+            font-size: 0.85rem; 
+            font-weight: 500; 
+            padding: 8px 14px; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            border: 1px solid var(--border);
+        }
+        .db-badge:hover { background-color: #e0e7ff; border-color: var(--primary); color: var(--primary); }
+        
+        .demo-btn { background-color: #ecfdf5; color: var(--success); border-color: #a7f3d0; width: 100%; text-align: center; font-weight: 600; }
+        .demo-btn:hover { background-color: #d1fae5; }
 
         /* Right Panel */
-        .results-panel { flex: 1; display: flex; flex-direction: column; background-color: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); overflow: hidden; }
+        .results-panel { flex: 1; overflow: hidden; }
         
-        /* Dual-Tab System */
-        .tab-header { display: flex; border-bottom: 1px solid var(--border-color); background-color: #fafbfc; }
-        .tab-btn { flex: 1; padding: 14px; background: none; border: none; font-size: 0.95rem; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; }
-        .tab-btn.active { color: var(--primary-blue); border-bottom: 3px solid var(--primary-blue); background-color: white; }
-        .tab-btn:hover:not(.active) { background-color: #f1f3f5; }
+        /* Modern Tabs */
+        .tab-header { display: flex; border-bottom: 1px solid var(--border); padding: 0 16px; }
+        .tab-btn { 
+            padding: 16px 24px; 
+            background: none; 
+            border: none; 
+            font-size: 1rem; 
+            font-weight: 600; 
+            color: var(--text-muted); 
+            cursor: pointer; 
+            border-bottom: 3px solid transparent; 
+            transition: all 0.2s; 
+        }
+        .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
+        .tab-btn:hover:not(.active) { color: var(--text-dark); }
         .tab-content { display: none; padding: 24px; flex: 1; overflow-y: auto; }
         .tab-content.active { display: flex; flex-direction: column; }
 
-        /* View Controller Toolbar */
-        .toolbar { display: flex; gap: 10px; margin-bottom: 15px; padding: 10px; background-color: #f8f9fa; border: 1px solid var(--border-color); border-radius: 4px; }
-        .toolbar-btn { padding: 6px 12px; font-size: 0.85rem; font-weight: 600; border: 1px solid var(--border-color); border-radius: 4px; background-color: white; color: var(--text-main); cursor: pointer; transition: 0.2s; }
-        .toolbar-btn:hover { background-color: #e9ecef; border-color: #ced4da; }
+        /* Toolbar */
+        .toolbar { display: flex; gap: 10px; margin-bottom: 16px; padding: 12px; background-color: #f9fafb; border-radius: 10px; border: 1px solid var(--border); align-items: center; }
+        .toolbar-btn { padding: 8px 16px; font-size: 0.85rem; font-weight: 600; border: 1px solid var(--border); border-radius: 8px; background-color: white; color: var(--text-dark); cursor: pointer; transition: 0.2s; }
+        .toolbar-btn:hover { background-color: #f3f4f6; border-color: #d1d5db; }
 
-        /* Tables & Data */
-        .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
-        .data-table th, .data-table td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border-color); }
-        .data-table th { font-weight: 600; color: var(--text-muted); background-color: #f8f9fa; }
-        .score-badge { background-color: #e9ecef; color: var(--text-main); padding: 4px 8px; border-radius: 4px; font-weight: 700; }
-        .status-active { color: var(--success-green); font-weight: 700; }
-        .status-inactive { color: var(--danger-red); font-weight: 700; }
+        /* Data Tables */
+        .data-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+        .data-table th, .data-table td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border); }
+        .data-table th { background-color: #f9fafb; font-weight: 600; color: var(--text-muted); font-size: 0.9rem; }
+        .data-table tr:last-child td { border-bottom: none; }
+        
+        .score-badge { background-color: #e0e7ff; color: var(--primary); padding: 6px 12px; border-radius: 6px; font-weight: 600; }
+        .status-active { color: var(--success); font-weight: 700; font-size: 1.1rem; }
+        .status-inactive { color: var(--danger); font-weight: 700; font-size: 1.1rem; }
 
-        .placeholder-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); text-align: center; padding: 40px; }
+        .placeholder-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); text-align: center; }
+        .placeholder-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
     </style>
     
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
@@ -83,158 +161,131 @@
 <body>
 
     <nav class="navbar">
-        <div class="navbar-brand">DRUG PROTEIN INTERACTION PREDICTOR 🧬</div>
-        <div class="navbar-status">GCUF Bioinformatics Lab | Server: Active</div>
+        <div class="navbar-brand">BioPredictor AI 🧬</div>
+        <div class="navbar-status"><div class="status-dot"></div> Server Online</div>
     </nav>
 
     <main class="dashboard-container">
         
-        <aside class="control-panel">
-            <div class="section-title">Experiment Setup</div>
+        <aside class="card control-panel">
+            <div class="section-title">New Prediction</div>
             <form action="/predict" method="POST">
                 <div class="form-group">
-                    <label for="protein">Target Protein (PDB ID / Sequence)</label>
+                    <label>Target Protein</label>
                     <input type="text" id="protein" name="protein" class="form-control" placeholder="e.g., 1IEP" required>
                 </div>
-                <br>
                 <div class="form-group">
-                    <label for="drug">Ligand Molecule (SMILES / Name)</label>
+                    <label>Ligand Molecule</label>
                     <input type="text" id="drug" name="drug" class="form-control" placeholder="e.g., Imatinib" required>
                 </div>
-                <button type="submit" class="btn-run">Run AI Inference Pipeline</button>
+                <button type="submit" class="btn-run">Analyze Interaction</button>
             </form>
 
             <div class="db-section">
-                <div class="section-title">Database Quick-Select</div>
-                
-                <div class="db-title-small">Known Target Proteins</div>
+                <div class="db-title-small">TARGETS</div>
                 <div class="db-grid">
-                    <span class="db-badge" onclick="fillInput('protein', '1IEP')">Cancer ABL1 (1IEP)</span>
-                    <span class="db-badge" onclick="fillInput('protein', '1M17')">EGFR (1M17)</span>
-                    <span class="db-badge" onclick="fillInput('protein', '3CL')">SARS-CoV-2 (3CL)</span>
+                    <span class="db-badge" onclick="fillInput('protein', '1IEP')">Cancer ABL1</span>
+                    <span class="db-badge" onclick="fillInput('protein', '1M17')">EGFR</span>
+                    <span class="db-badge" onclick="fillInput('protein', '3CL')">SARS-CoV-2</span>
                 </div>
 
-                <div class="db-title-small">Ligand Database (CSV)</div>
+                <div class="db-title-small">LIGANDS</div>
                 <div class="db-grid">
                     <span class="db-badge" onclick="fillInput('drug', 'Imatinib')">Imatinib</span>
                     <span class="db-badge" onclick="fillInput('drug', 'Aspirin')">Aspirin</span>
                     <span class="db-badge" onclick="fillInput('drug', 'Penicillin')">Penicillin</span>
-                    <span class="db-badge" onclick="fillInput('drug', 'Ibuprofen')">Ibuprofen</span>
                 </div>
 
-                <span class="db-badge demo-btn" onclick="fillDemo('1IEP', 'Imatinib')">
-                    ✨ Load Golden Pair (Live Demo)
-                </span>
+                <span class="db-badge demo-btn" onclick="fillDemo('1IEP', 'Imatinib')">✨ Load Demo Pair</span>
             </div>
         </aside>
 
-        <section class="results-panel">
-            
+        <section class="card results-panel">
             {% if prediction %}
-            
                 <div class="tab-header">
-                    <button class="tab-btn active" onclick="switchTab('ai-tab', this)">Prediction AI</button>
-                    <button class="tab-btn" onclick="switchTab('3d-tab', this)">3D Simulation</button>
+                    <button class="tab-btn active" onclick="switchTab('ai-tab', this)">AI Analytics</button>
+                    <button class="tab-btn" onclick="switchTab('3d-tab', this)">3D Viewer</button>
                 </div>
 
                 <div id="ai-tab" class="tab-content active">
-                    <div class="section-title">Inference Analytics</div>
+                    <h3 style="margin-bottom: 16px; color: var(--text-dark);">Interaction Results</h3>
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Parameter</th>
-                                <th>Computed Value</th>
+                                <th>Metric</th>
+                                <th>Result</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Prediction Result</td>
+                                <td>Status</td>
                                 <td class="{% if prediction == 'Active' %}status-active{% else %}status-inactive{% endif %}">{{ prediction }}</td>
                             </tr>
                             <tr>
-                                <td>Binding Probability</td>
-                                <td><span class="score-badge">{{ prediction_score }}% Confidence</span></td>
+                                <td>Confidence Score</td>
+                                <td><span class="score-badge">{{ prediction_score }}%</span></td>
                             </tr>
                             <tr>
-                                <td>Target Protein ID</td>
+                                <td>Protein PDB ID</td>
                                 <td>{{ pdb_id }}</td>
                             </tr>
                             <tr>
-                                <td>Ligand Input</td>
+                                <td>Drug Target</td>
                                 <td>{{ drug_name }}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div id="3d-tab" class="tab-content" style="padding: 10px;">
+                <div id="3d-tab" class="tab-content" style="padding: 16px;">
                     <div class="toolbar">
-                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); padding-top: 5px; margin-right: 10px;">View Controller:</span>
+                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-right: 8px;">View:</span>
                         <button class="toolbar-btn" onclick="setVisualMode('protein')">Protein Only</button>
-                        <button class="toolbar-btn" onclick="setVisualMode('drug')">Drug Only</button>
-                        <button class="toolbar-btn" onclick="setVisualMode('interaction')">Interaction (Ghost + Spheres)</button>
+                        <button class="toolbar-btn" onclick="setVisualMode('drug')">Ligand Only</button>
+                        <button class="toolbar-btn" onclick="setVisualMode('interaction')">Interaction Mode</button>
                     </div>
-
-                    <div style="flex: 1; width: 100%; position: relative; border: 1px solid var(--border-color); border-radius: 4px;" 
-                         id="viewer_3Dmoljs"
-                         class="viewer_3Dmoljs" 
-                         data-pdb="{{ pdb_id }}" 
-                         data-backgroundcolor="0xe9ecef" 
-                         data-style="cartoon:color=spectrum">
+                    <div style="flex: 1; width: 100%; border-radius: 10px; overflow: hidden; border: 1px solid var(--border);" 
+                         id="viewer_3Dmoljs" class="viewer_3Dmoljs" data-pdb="{{ pdb_id }}" 
+                         data-backgroundcolor="0xf9fafb" data-style="cartoon:color=spectrum">
                     </div>
                 </div>
-
             {% else %}
                 <div class="placeholder-screen">
-                    <h3 style="color: var(--primary-blue); margin-bottom: 10px;">System Ready</h3>
-                    <p>Enter a target sequence and ligand in the control panel<br>to initiate the machine learning pipeline.</p>
+                    <div class="placeholder-icon">🔬</div>
+                    <h3 style="color: var(--text-dark); margin-bottom: 8px;">Awaiting Input</h3>
+                    <p>Select a target and ligand to begin the analysis.</p>
                 </div>
             {% endif %}
-
         </section>
     </main>
 
     <script>
-        // Database Auto-Fill Logic
         function fillInput(fieldId, value) {
             let input = document.getElementById(fieldId);
             input.value = value;
-            // Highlight effect so user knows it clicked
-            input.style.backgroundColor = "#e3f2fd";
-            setTimeout(() => input.style.backgroundColor = "white", 300);
+            input.style.boxShadow = "0 0 0 3px rgba(79, 70, 229, 0.2)";
+            setTimeout(() => input.style.boxShadow = "none", 300);
         }
-
-        function fillDemo(proteinVal, drugVal) {
-            fillInput('protein', proteinVal);
-            fillInput('drug', drugVal);
-        }
-
-        // Dual-Tab Logic
+        function fillDemo(proteinVal, drugVal) { fillInput('protein', proteinVal); fillInput('drug', drugVal); }
         function switchTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             element.classList.add('active');
         }
-
-        // View Controller Logic for 3Dmol.js
         function setVisualMode(mode) {
             let viewers = $3Dmol.viewers;
             if(!viewers || viewers.length === 0) return;
             let glviewer = viewers[0]; 
-
             glviewer.removeAllLabels();
-
             if (mode === 'protein') {
                 glviewer.setStyle({hetatm: false}, {cartoon: {color: 'spectrum'}});
                 glviewer.setStyle({hetatm: true}, {hidden: true});
-            } 
-            else if (mode === 'drug') {
+            } else if (mode === 'drug') {
                 glviewer.setStyle({hetatm: false}, {hidden: true});
                 glviewer.setStyle({hetatm: true}, {stick: {radius: 0.2}, sphere: {radius: 0.4, color: 'cyan'}});
                 glviewer.zoomTo({hetatm: true});
-            } 
-            else if (mode === 'interaction') {
+            } else if (mode === 'interaction') {
                 glviewer.setStyle({hetatm: false}, {cartoon: {color: 'white', opacity: 0.4}});
                 glviewer.setStyle({hetatm: true}, {sphere: {color: 'yellow', radius: 1.5}});
                 glviewer.zoomTo({hetatm: true});
@@ -242,6 +293,5 @@
             glviewer.render();
         }
     </script>
-
 </body>
 </html>
